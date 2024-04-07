@@ -1,5 +1,60 @@
-import React from "react";
+import React, { useState } from "react";
+import './signIn.css';
+import { useAuth } from "../../providers/authProvider";
+import { Link } from "react-router-dom";
 
 export const SignIn = () => {
-    return <div>SignIn</div>
+    const [formData, setFormData] = useState({ email: '', password: '' });
+    const { login, loading, error } = useAuth();
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+    }
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        login(formData);
+    }
+
+    return (
+        <div className="container">
+            <h2>Sign In</h2>
+            <form onSubmit={handleSubmit}>
+                <div className="input-group">
+                    <label htmlFor="email">Email:</label>
+                    <input
+                        type="text"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div className="input-group">
+                    <label htmlFor="password">Password:</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div className="input-group">
+                    {error && <p className="error">{error.message}</p>}
+                    <button
+                        type="submit"
+                        disabled={loading}>
+                        {loading ? 'Signing...' : 'Sign In'}
+                    </button>
+                    <p>
+                        <Link to="/signup">Sign Up</Link>
+                    </p>
+                </div>
+            </form>
+        </div>
+    )
 }

@@ -5,7 +5,7 @@
 from flask_restful import Resource, reqparse
 from flask_pymongo import PyMongo
 from flask_bcrypt import Bcrypt
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from bson import ObjectId
 
 from ..config.db import mongo
@@ -55,3 +55,18 @@ class SigninResource(Resource):
         # User authenticated, generate access token
         access_token = create_access_token(identity=str(user['_id']))
         return {'message': 'User sign in successfully.', 'status': 'success', 'token': access_token}, 200
+
+class UserResource(Resource):
+    def __init__(self):
+        self.mongo = mongo
+    
+    @jwt_required()
+    def get(self):
+        current_user_id = get_jwt_identity()
+        print(current_user_id)
+        user = self.mongo.db.users.find_one_or_404({'_id': ObjectId(current_user_id)})
+        print(user)
+        if user:
+            return {'_id': str(user['_id']), 'email': user['email']}, 200
+        else:
+            return {'message': 'User not found'}, 404
